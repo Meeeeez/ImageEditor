@@ -3,6 +3,9 @@ import PIL
 from PIL import Image
 import time
 import keyboard
+import tkinter as tk
+from PIL import Image, ImageTk
+from tkinter.filedialog import askopenfile
 
 
 def get_rgb_value(clicks):
@@ -28,18 +31,13 @@ def rgb_to_y():
             y_pixels[i, j] = (y, y, y)
     print("test")
     y_img.save("img/yPicture.jpg")
-    open_image("img/yPicture.jpg", "Y Image")
+    # open_image("img/yPicture.jpg", "Y Image")
 
 
 def yuv_from_rgb(r, g, b):
     y = r * .299000 + g * .587000 + b * .114000
     u = r * -.168736 + g * -.331264 + b * .500000 + 128
     v = r * .500000 + g * -.418688 + b * -.081312 + 128
-    y = int(round(y))
-    u = int(round(u))
-    v = int(round(v))
-    # print("lol:" + str(r * .299000) + " " + str(g * .587000) + " " + str(b * .114000))
-    # print("YUV: (" + str(y) + " " + str(u) + " " + str(v) + ")")
 
 
 # this function will be called whenever the mouse is left-clicked
@@ -64,6 +62,9 @@ def mouse_callback(event, x, y, flags, params):
         get_rgb_value(left_clicks)
         left_clicks.clear()
         rgb_to_y()
+        cv2.destroyWindow("Taken Image")
+
+        # rgb_to_u()
 
 
 def take_picture_and_save():
@@ -116,11 +117,10 @@ def white_balance(white_rgb):
             pixels[i, j] = (int(img_red), int(img_green), int(img_blue))
 
     img_to_change.save("img/modifiedPicture.jpg")
-    open_image("img/modifiedPicture.jpg", "Modified Image")
+    # open_image("img/modifiedPicture.jpg", "Modified Image")
 
 
 def open_image(path, name):
-    print("lol")
     global path_image
     path_image = path
     global img
@@ -132,7 +132,6 @@ def open_image(path, name):
     window_height = int(img.shape[0] * scale)
     cv2.namedWindow(name, cv2.WINDOW_NORMAL)
     cv2.resizeWindow(name, window_width, window_height)
-
     if name == "Taken Image":
         # set mouse callback function for window
         cv2.setMouseCallback(name, mouse_callback)
@@ -142,6 +141,59 @@ def open_image(path, name):
     cv2.destroyAllWindows()
 
 
+def update_gui():
+    pic = Image.open("img/takenPicture.jpg")
+    pic = ImageTk.PhotoImage(pic)
+    pic_label = tk.Label(image=pic)
+    pic_label.image = pic
+    pic_label.grid(column=1, row=0)
+
+
+def gui():
+    root = tk.Tk()
+    canvas = tk.Canvas(root, width=600, height=300)
+    canvas.grid(columnspan=3, rowspan=3)
+
+    pic = Image.open("img/takenPicture.jpg")
+    pic = ImageTk.PhotoImage(pic)
+    pic_label = tk.Label(image=pic)
+    pic_label.image = pic
+    pic_label.grid(column=1, row=0)
+
+    browse_text = tk.StringVar()
+    browse_btn = tk.Button(root, textvariable=browse_text, command=lambda: modified_image(), font="Raleway")
+    browse_text.set("Modified Image")
+    browse_btn.grid(column=1, row=3)
+
+    browse_text = tk.StringVar()
+    browse_btn = tk.Button(root, textvariable=browse_text, command=lambda: y_image(), font="Raleway")
+    browse_text.set("Y Image")
+    browse_btn.grid(column=1, row=4)
+
+    root.mainloop()
+
+
+def modified_image():
+    # pic
+    pic = Image.open("img/modifiedPicture.jpg")
+    pic = ImageTk.PhotoImage(pic)
+    pic_label = tk.Label(image=pic)
+    pic_label.image = pic
+    pic_label.grid(column=2, row=0)
+    pic_label.size()
+
+
+def y_image():
+    # pic
+    pic = Image.open("img/yPicture.jpg")
+    pic = ImageTk.PhotoImage(pic)
+    pic_label = tk.Label(image=pic)
+    pic_label.image = pic
+    pic_label.grid(column=2, row=0)
+    pic_label.size()
+
+
 if __name__ == '__main__':
     take_picture_and_save()
     open_image("img/takenPicture.jpg", 'Taken Image')
+    gui()
