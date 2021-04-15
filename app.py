@@ -5,6 +5,8 @@ import time
 import keyboard
 import tkinter as tk
 from PIL import Image, ImageTk
+import os
+import shutil
 from tkinter.filedialog import askopenfile
 
 
@@ -69,6 +71,7 @@ def mouse_callback(event, x, y, flags, params):
 
 def take_picture_and_save():
     global frame
+    has_taken_picture = False
     cv2.namedWindow("Camera", cv2.WINDOW_AUTOSIZE)
     camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
@@ -84,12 +87,15 @@ def take_picture_and_save():
             break
 
         if keyboard.is_pressed(' '):  # take picture and save it if space is pressed
+            has_taken_picture = True
             img_name = 'img/takenPicture.jpg'
             print(img_name + " written to img/")
             if not cv2.imwrite(img_name, frame):
                 raise Exception("Could not write image")
             time.sleep(.2)
             break
+    if not has_taken_picture:
+        quit()
     camera.release()
     cv2.destroyWindow("Camera")
 
@@ -170,6 +176,11 @@ def gui():
     browse_text.set("Y Image")
     browse_btn.grid(column=1, row=4)
 
+    #camera_text = tk.StringVar()
+    #camera_btn = tk.Button(root, textvariable=camera_text, command=lambda: take_picture_and_save(), font="Raleway")
+    #camera_text.set("New Picture")
+    #camera_btn.grid(column=1, row=5)
+
     root.mainloop()
 
 
@@ -193,7 +204,13 @@ def y_image():
     pic_label.size()
 
 
+def delete_prev_images():
+    shutil.rmtree("img")
+    os.mkdir("img")
+
+
 if __name__ == '__main__':
+    delete_prev_images()
     take_picture_and_save()
     open_image("img/takenPicture.jpg", 'Taken Image')
     gui()
