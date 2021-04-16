@@ -175,52 +175,36 @@ def rgb_to_y():
 
 
 def set_brightness(args):
-    value = int(args)
-    value /= 100.00
-    im = Image.open("img/takenPicture.jpg")
-    enhancer = ImageEnhance.Brightness(im)
-    enhanced_im = enhancer.enhance(value)
-
-    pic = ImageTk.PhotoImage(enhanced_im)
-    pic_label = tkinter.Label(image=pic)
-    pic_label.image = pic
-    pic_label.grid(column=1, row=0)
+    manually_modify_image(args, "brightness")
 
 
 def set_saturation(args):
-    value = int(args)
-    value /= 100.00
-
-    im = Image.open("img/takenPicture.jpg")
-    enhancer = ImageEnhance.Color(im)
-    enhanced_im = enhancer.enhance(value)
-
-    pic = ImageTk.PhotoImage(enhanced_im)
-    pic_label = tkinter.Label(image=pic)
-    pic_label.image = pic
-    pic_label.grid(column=1, row=0)
+    manually_modify_image(args, "saturation")
 
 
 def set_contrast(args):
-    value = int(args)
-    value /= 100.00
-
-    im = Image.open("img/takenPicture.jpg")
-    enhancer = ImageEnhance.Contrast(im)
-    enhanced_im = enhancer.enhance(value)
-
-    pic = ImageTk.PhotoImage(enhanced_im)
-    pic_label = tkinter.Label(image=pic)
-    pic_label.image = pic
-    pic_label.grid(column=1, row=0)
+    manually_modify_image(args, "contrast")
 
 
 def set_sharpness(args):
+    manually_modify_image(args, "sharpness")
+
+
+def manually_modify_image(args, call_from):
     value = int(args)
     value /= 100.00
+    print(value)
 
     im = Image.open("img/takenPicture.jpg")
-    enhancer = ImageEnhance.Sharpness(im)
+    if call_from == "brightness":
+        enhancer = ImageEnhance.Brightness(im)
+    elif call_from == "saturation":
+        enhancer = ImageEnhance.Color(im)
+    elif call_from == "sharpness":
+        enhancer = ImageEnhance.Sharpness(im)
+    elif call_from == "contrast":
+        enhancer = ImageEnhance.Contrast(im)
+
     enhanced_im = enhancer.enhance(value)
 
     pic = ImageTk.PhotoImage(enhanced_im)
