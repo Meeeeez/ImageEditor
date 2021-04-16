@@ -96,6 +96,8 @@ def mouse_callback(event, x, y, flags, params):
         get_rgb_value(left_clicks)
         # develop Y(UV)-Image
         rgb_to_y()
+        rgb_to_u()
+        rgb_to_v()
 
         # clear coordinates
         left_clicks.clear()
@@ -174,6 +176,46 @@ def rgb_to_y():
     # open_image("img/yPicture.jpg", "Y Image")
 
 
+def rgb_to_u():
+    u_img = Image.open("img/takenPictureY.jpg")
+    u_pixels = u_img.load()
+    for i in range(u_img.size[0]):  # for every pixel:
+        for j in range(u_img.size[1]):
+            y_red = u_pixels[i, j][0]
+            y_green = u_pixels[i, j][1]
+            y_blue = u_pixels[i, j][2]
+            # U
+            r = y_red*-.168736
+            g = y_green*-.331264 + 128
+            b = y_blue*.500000
+            r = int(round(r))
+            g = int(round(g))
+            b = int(round(b))
+            u_pixels[i, j] = (r, g, b)
+    u_img.save("img/uPicture.jpg")
+    # open_image("img/uPicture.jpg", "U Image")
+
+
+def rgb_to_v():
+    v_img = Image.open("img/takenPictureY.jpg")
+    v_pixels = v_img.load()
+    for i in range(v_img.size[0]):  # for every pixel:
+        for j in range(v_img.size[1]):
+            y_red = v_pixels[i, j][0]
+            y_green = v_pixels[i, j][1]
+            y_blue = v_pixels[i, j][2]
+            # V
+            r = y_red * .500000
+            g = y_green * -.418688 + 128
+            b = y_blue * -.081312
+            r = int(round(r))
+            g = int(round(g))
+            b = int(round(b))
+            v_pixels[i, j] = (r, g, b)
+    v_img.save("img/vPicture.jpg")
+    # open_image("img/vPicture.jpg", "V Image")
+
+
 def set_brightness(args):
     manually_modify_image(args, "brightness")
 
@@ -193,7 +235,6 @@ def set_sharpness(args):
 def manually_modify_image(args, call_from):
     value = int(args)
     value /= 100.00
-    print(value)
 
     im = Image.open("img/takenPicture.jpg")
     if call_from == "brightness":
@@ -205,15 +246,20 @@ def manually_modify_image(args, call_from):
     elif call_from == "contrast":
         enhancer = ImageEnhance.Contrast(im)
 
+    global enhanced_im
     enhanced_im = enhancer.enhance(value)
 
-    pic = ImageTk.PhotoImage(enhanced_im)
-    pic_label = tkinter.Label(image=pic)
-    pic_label.image = pic
-    pic_label.grid(column=1, row=0)
+    modified_pic = ImageTk.PhotoImage(enhanced_im)
+    modified_pic_label = tkinter.Label(image=modified_pic)
+    modified_pic_label.image = modified_pic
+    modified_pic_label.grid(column=1, row=0)
 
 
 # this function (builds a GUI) will be called after the taken picture has been opened
+def save_image():
+    enhanced_im.save("img/takenPicture.jpg")
+
+
 def gui():
     # root-field
     root = tkinter.Tk()
@@ -231,32 +277,52 @@ def gui():
     pic_label.grid(column=1, row=0)
 
     # 'Modified Image' button
-    browse_text = tkinter.StringVar()
-    browse_btn = tkinter.Button(root, textvariable=browse_text, command=lambda: modified_image(), font="Raleway")
-    browse_text.set("Modified Image")
-    browse_btn.grid(column=1, row=3)
+    modified_text = tkinter.StringVar()
+    modified_btn = tkinter.Button(root, textvariable=modified_text, command=lambda: modified_image(), font="Raleway")
+    modified_text.set("Modified Image")
+    modified_btn.grid(column=1, row=3)
 
     # 'Y Image' button
-    browse_text = tkinter.StringVar()
-    browse_btn = tkinter.Button(root, textvariable=browse_text, command=lambda: y_image(), font="Raleway")
-    browse_text.set("Y Image")
-    browse_btn.grid(column=1, row=4)
+    y_text = tkinter.StringVar()
+    y_btn = tkinter.Button(root, textvariable=y_text, command=lambda: y_image(), font="Raleway")
+    y_text.set("Y Image")
+    y_btn.grid(column=1, row=4)
 
     slider_brightness = Scale(root, from_=0, to=200, orient=HORIZONTAL, command=set_brightness)
     slider_brightness.set(100)
     slider_brightness.grid(column=2, row=1)
 
+    brightness_text = tkinter.StringVar()
+    brightness_btn = tkinter.Button(root, textvariable=brightness_text, command=lambda: save_image(), font="Raleway")
+    brightness_text.set("OK")
+    brightness_btn.grid(column=3, row=1)
+
     slider_saturation = Scale(root, from_=0, to=200, orient=HORIZONTAL, command=set_saturation)
     slider_saturation.set(100)
     slider_saturation.grid(column=2, row=2)
+
+    brightness_text = tkinter.StringVar()
+    brightness_btn = tkinter.Button(root, textvariable=brightness_text, command=lambda: save_image(), font="Raleway")
+    brightness_text.set("OK")
+    brightness_btn.grid(column=3, row=2)
 
     slider_contrast = Scale(root, from_=0, to=200, orient=HORIZONTAL, command=set_contrast)
     slider_contrast.set(100)
     slider_contrast.grid(column=2, row=3)
 
+    brightness_text = tkinter.StringVar()
+    brightness_btn = tkinter.Button(root, textvariable=brightness_text, command=lambda: save_image(), font="Raleway")
+    brightness_text.set("OK")
+    brightness_btn.grid(column=3, row=3)
+
     slider_sharpness = Scale(root, from_=0, to=200, orient=HORIZONTAL, command=set_sharpness)
     slider_sharpness.set(100)
     slider_sharpness.grid(column=2, row=4)
+
+    brightness_text = tkinter.StringVar()
+    brightness_btn = tkinter.Button(root, textvariable=brightness_text, command=lambda: save_image(), font="Raleway")
+    brightness_text.set("OK")
+    brightness_btn.grid(column=3, row=4)
 
     # this is needed to display the GUI
     root.mainloop()
@@ -278,11 +344,30 @@ def modified_image():
 def y_image():
     # open image
     pic = Image.open("img/yPicture.jpg")
+    pic = pic.resize((round(128), round(96)))
     pic = ImageTk.PhotoImage(pic)
     # add image to the canvas
     pic_label = tkinter.Label(image=pic)
     pic_label.image = pic
-    pic_label.grid(column=2, row=0)
+    pic_label.grid(column=1, row=5)
+    pic_label.size()
+
+    pic = Image.open("img/uPicture.jpg")
+    pic = pic.resize((round(128), round(96)))
+    pic = ImageTk.PhotoImage(pic)
+    # add image to the canvas
+    pic_label = tkinter.Label(image=pic)
+    pic_label.image = pic
+    pic_label.grid(column=2, row=5)
+    pic_label.size()
+
+    pic = Image.open("img/vPicture.jpg")
+    pic = pic.resize((round(128), round(96)))
+    pic = ImageTk.PhotoImage(pic)
+    # add image to the canvas
+    pic_label = tkinter.Label(image=pic)
+    pic_label.image = pic
+    pic_label.grid(column=3, row=5)
     pic_label.size()
 
 
