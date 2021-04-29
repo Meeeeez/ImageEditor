@@ -24,16 +24,37 @@ def take_picture_and_save():
     has_taken_picture = False
     # open camera
     cv2.namedWindow("Camera", cv2.WINDOW_AUTOSIZE)
-    camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    # camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    capture = cv2.VideoCapture(0)
+    try:
+        capture.set(cv2.CAP_PROP_BRIGHTNESS, value_brightness)
+    except:
+        capture.set(cv2.CAP_PROP_BRIGHTNESS, capture.get(cv2.CAP_PROP_BRIGHTNESS))
+    try:
+        capture.set(cv2.CAP_PROP_CONTRAST, value_contrast)
+    except:
+        capture.set(cv2.CAP_PROP_CONTRAST, capture.get(cv2.CAP_PROP_CONTRAST))
+    try:
+        capture.set(cv2.CAP_PROP_SATURATION, value_saturation)
+    except:
+        capture.set(cv2.CAP_PROP_SATURATION, capture.get(cv2.CAP_PROP_SATURATION))
+    try:
+        capture.set(cv2.CAP_PROP_GAIN, value_gain)
+    except:
+        capture.set(cv2.CAP_PROP_GAIN, capture.get(cv2.CAP_PROP_GAIN))
+    try:
+        capture.set(cv2.CAP_PROP_BACKLIGHT, value_backlight)
+    except:
+        capture.set(cv2.CAP_PROP_BACKLIGHT, capture.get(cv2.CAP_PROP_BACKLIGHT))
 
     # try to get the first frame
-    if camera.isOpened():
-        return_value, frame = camera.read()
+    if capture.isOpened():
+        return_value, frame = capture.read()
 
     # show image as long as window is open
     while cv2.getWindowProperty('Camera', 0) >= 0:
         cv2.imshow("Camera", frame)
-        return_value, frame = camera.read()
+        return_value, frame = capture.read()
         key_code = cv2.waitKey(1)
 
         # close camera if user uses the 'esc'-key
@@ -55,7 +76,7 @@ def take_picture_and_save():
     if not has_taken_picture:
         quit()
     # release the camera and close the window
-    camera.release()
+    capture.release()
     cv2.destroyWindow("Camera")
 
 
@@ -184,9 +205,9 @@ def rgb_to_u():
             y_green = u_pixels[i, j][1]
             y_blue = u_pixels[i, j][2]
             # U
-            r = y_red*-.168736
-            g = y_green*-.331264 + 128
-            b = y_blue*.500000
+            r = y_red * -.168736
+            g = y_green * -.331264 + 128
+            b = y_blue * .500000
             r = int(round(r))
             g = int(round(g))
             b = int(round(b))
@@ -274,7 +295,7 @@ def yuv_image():
 
     # open image
     pic = Image.open("img/yPicture.jpg")
-    pic = pic.resize((round(264), round(192)))
+    pic = pic.resize((round(414), round(342)))
     pic = ImageTk.PhotoImage(pic)
     # add image to the canvas
     pic_label = tk.Label(image=pic)
@@ -283,7 +304,7 @@ def yuv_image():
     pic_label.size()
 
     pic = Image.open("img/uPicture.jpg")
-    pic = pic.resize((round(264), round(192)))
+    pic = pic.resize((round(414), round(342)))
     pic = ImageTk.PhotoImage(pic)
     # add image to the canvas
     pic_label = tk.Label(image=pic)
@@ -292,7 +313,7 @@ def yuv_image():
     pic_label.size()
 
     pic = Image.open("img/vPicture.jpg")
-    pic = pic.resize((round(264), round(192)))
+    pic = pic.resize((round(414), round(342)))
     pic = ImageTk.PhotoImage(pic)
     # add image to the canvas
     pic_label = tk.Label(image=pic)
@@ -401,30 +422,129 @@ def sliders():
     return
 
 
-def gui():
-    root.geometry("800x500")
-    root.title("Des isch insre GUI")
-    root.state('zoomed')
+def set_camera_backlight(args):
+    global value_backlight
+    value_backlight = float(args)
 
-    menubar = tk.Menu(root)
-    filemenu = tk.Menu(menubar, tearoff=0)
 
-    menubar.add_cascade(label="Exit", command=root.quit)
-    menubar.add_cascade(label="White Balance Correction", command=white_balance_gui)
-    menubar.add_cascade(label="Sliders ", command=sliders)
-    menubar.add_cascade(label="YUV Image", command=yuv_image)
+def set_camera_gain(args):
+    global value_gain
+    value_gain = float(args)
 
-    root.config(menu=menubar)
 
-    root.mainloop()
+def set_camera_sharpness(args):
+    global value_sharpness
+    value_sharpness = float(args)
+
+
+def set_camera_saturation(args):
+    global value_saturation
+    value_saturation = float(args)
+
+
+def set_camera_contrast(args):
+    global value_contrast
+    value_contrast = float(args)
+
+
+def set_camera_brightness(args):
+    global value_brightness
+    value_brightness = float(args)
+
+
+def destroy_gui():
+    root_properties.destroy()
+
+
+def slider_camera():
+    camera_brightness = Scale(root_properties, from_=0, to=127, orient=HORIZONTAL, command=set_camera_brightness)
+    camera_brightness.set(0)
+    camera_brightness.grid(column=0, row=0)
+
+    var = StringVar()
+    var.set("Brightness")
+    label = Label(root_properties, textvariable=var, relief=RAISED)
+    label.grid(column=1, row=0)
+
+    camera_contrast = Scale(root_properties, from_=0, to=64, orient=HORIZONTAL, command=set_camera_contrast)
+    camera_contrast.set(32)
+    camera_contrast.grid(column=0, row=1)
+
+    var = StringVar()
+    var.set("Contrast")
+    label = Label(root_properties, textvariable=var, relief=RAISED)
+    label.grid(column=1, row=1)
+
+    camera_saturation = Scale(root_properties, from_=0, to=100, orient=HORIZONTAL, command=set_camera_saturation)
+    camera_saturation.set(64)
+    camera_saturation.grid(column=0, row=2)
+
+    var = StringVar()
+    var.set("Saturation")
+    label = Label(root_properties, textvariable=var, relief=RAISED)
+    label.grid(column=1, row=2)
+
+    camera_sharpness = Scale(root_properties, from_=0, to=8, orient=HORIZONTAL, command=set_camera_sharpness)
+    camera_sharpness.set(2)
+    camera_sharpness.grid(column=0, row=3)
+
+    var = StringVar()
+    var.set("Sharpness")
+    label = Label(root_properties, textvariable=var, relief=RAISED)
+    label.grid(column=1, row=3)
+
+    camera_gain = Scale(root_properties, from_=0, to=100, orient=HORIZONTAL, command=set_camera_gain)
+    camera_gain.set(64)
+    camera_gain.grid(column=0, row=4)
+
+    var = StringVar()
+    var.set("Gain")
+    label = Label(root_properties, textvariable=var, relief=RAISED)
+    label.grid(column=1, row=4)
+
+    camera_backlight = Scale(root_properties, from_=0, to=1, orient=HORIZONTAL, command=set_camera_backlight)
+    camera_backlight.set(0)
+    camera_backlight.grid(column=0, row=5)
+
+    var = StringVar()
+    var.set("Backlight")
+    label = Label(root_properties, textvariable=var, relief=RAISED)
+    label.grid(column=1, row=5)
+
+    btn_text = tk.StringVar()
+    camera_btn = tk.Button(root_properties, textvariable=btn_text, command=lambda: destroy_gui(),
+                           font="Raleway")
+    btn_text.set("OK")
+    camera_btn.grid(column=0, row=6)
+
+def gui(called_from):
+    if called_from == "menu":
+        root.geometry("800x500")
+        root.title("Des isch insre GUI")
+        root.state('zoomed')
+        menubar = tk.Menu(root)
+        filemenu = tk.Menu(menubar, tearoff=0)
+
+        menubar.add_cascade(label="Exit", command=root.quit)
+        menubar.add_cascade(label="White Balance Correction", command=white_balance_gui)
+        menubar.add_cascade(label="Sliders ", command=sliders)
+        menubar.add_cascade(label="YUV Image", command=yuv_image)
+
+        root.config(menu=menubar)
+        root.mainloop()
+    elif called_from == "properties":
+        slider_camera()
+        root_properties.mainloop()
 
 
 if __name__ == "__main__":
-    # 1
     delete_prev_images()
-    # 2
+
+    root_properties = tk.Tk()
+    gui("properties")
+
     take_picture_and_save()
-    # 3
     open_image("img/takenPicture.jpg", 'Taken Image')
+
     root = tk.Tk()
-    gui()
+    gui("menu")
